@@ -9,8 +9,8 @@ use std::thread::sleep;
 use std::time::Duration;
 use sysinfo::{ProcessesToUpdate, System};
 
-mod pe;
 mod patcher;
+mod pe;
 
 use patcher::Patcher;
 
@@ -56,7 +56,11 @@ fn main() {
     }
 }
 
-fn run_patcher(patcher: &mut Patcher, file_path: &str, rng: &mut impl Rng) -> Result<(), Box<dyn std::error::Error>> {
+fn run_patcher(
+    patcher: &mut Patcher,
+    file_path: &str,
+    rng: &mut impl Rng,
+) -> Result<(), Box<dyn std::error::Error>> {
     let mut file = File::open(file_path)?;
     let mut mz_header = [0; 2];
     file.read_exact(&mut mz_header)?;
@@ -91,13 +95,18 @@ fn run_patcher(patcher: &mut Patcher, file_path: &str, rng: &mut impl Rng) -> Re
     let mut random_version = vec![0u8; bytes_to_replace];
     rng.fill(&mut random_version[..]);
 
-    patcher.patch_bytes_by_offset(file_path, offset - (bytes_to_replace as i64) + 4, &random_version)?;
+    patcher.patch_bytes_by_offset(
+        file_path,
+        offset - (bytes_to_replace as i64) + 4,
+        &random_version,
+    )?;
 
     log_message("Replacing standart DOS Stub message...");
-    patcher.patch_bytes(file_path, b"This program cannot be run in DOS mode.", DOS_STUB_MESSAGE.as_ref())?;
-
-    log_message("WinAPI changing...");
-    patcher.patch_bytes(file_path, b"ExitProcess", b"CopyContext")?;
+    patcher.patch_bytes(
+        file_path,
+        b"This program cannot be run in DOS mode.",
+        DOS_STUB_MESSAGE.as_ref(),
+    )?;
 
     log_message("EntryPoint patching...");
     let is_build64 = pe::is_64(file_path)?;

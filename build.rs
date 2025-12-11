@@ -5,6 +5,6 @@ fn main() {
     embed_resource::compile("./resource/resource.rc", embed_resource::NONE);
 
     // 兼容 Windows 7、Windows XP
-    #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+    #[cfg(not(debug_assertions))]
     thunk::thunk();
 }
