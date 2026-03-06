@@ -4,6 +4,14 @@ use std::io::{self, Read, Seek, SeekFrom};
 const PE_SIGNATURE_OFFSET: u64 = 0x3C;
 const COFF_HEADER_OFFSET: u64 = 0x04;
 
+/// Get the offset of the PE signature in a file
+///
+/// # Arguments
+/// * `file_path` - The path to the file to be checked.
+///
+/// # Returns
+///
+/// * `io::Result<u64>` - Returns the offset of the PE signature in the file if found, otherwise returns an `io::Error`.
 pub fn get_offset_of_pe(file_path: &str) -> io::Result<u64> {
     let mut file = File::open(file_path)?;
     file.seek(SeekFrom::Start(PE_SIGNATURE_OFFSET))?;
@@ -11,7 +19,14 @@ pub fn get_offset_of_pe(file_path: &str) -> io::Result<u64> {
     file.read_exact(&mut offset_bytes)?;
     Ok(u32::from_le_bytes(offset_bytes) as u64)
 }
-
+/// Check if a PE file is 64-bit
+///
+/// # Arguments
+/// * `file_path` - The path to the file to be checked.
+///
+/// # Returns
+///
+/// * `io::Result<bool>` - Returns `Ok(true)` if the file is a 64-bit PE file, otherwise returns `Ok(false)`.
 pub fn is_64(file_path: &str) -> io::Result<bool> {
     let pe_offset = get_offset_of_pe(file_path)?;
     let mut file = File::open(file_path)?;
